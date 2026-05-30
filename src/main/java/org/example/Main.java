@@ -50,6 +50,10 @@ public class Main extends JFrame {
         initComponents();
         layoutComponents();
         addListeners();
+
+        // Clear clipboard on application startup
+        ClipboardMonitor.clearClipboard();
+        linkDisplayArea.append("Clipboard cleared on startup.\n");
     }
 
     private void initComponents() {

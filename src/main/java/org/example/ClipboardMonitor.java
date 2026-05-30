@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
@@ -37,12 +38,18 @@ public class ClipboardMonitor implements Runnable {
                         // Basic check for a URL pattern
                         if (currentClipboardContent.startsWith("http://") || currentClipboardContent.startsWith("https://")) {
                             final String link = currentClipboardContent.trim();
-                            targetLinksList.add(link);
-                            SwingUtilities.invokeLater(() -> {
-                                displayArea.append("Captured (" + type + "): " + link + "\n");
-                            });
+                            if (!targetLinksList.contains(link)) { // Ensure uniqueness
+                                targetLinksList.add(link);
+                                SwingUtilities.invokeLater(() -> {
+                                    displayArea.append("Captured (" + type + "): " + link + "\n");
+                                });
+                            } else {
+                                SwingUtilities.invokeLater(() -> {
+                                    displayArea.append("Skipped duplicate (" + type + "): " + link + "\n");
+                                });
+                            }
                         }
-                        lastClipboardContent = currentClipboardContent;
+                        lastClipboardContent = currentClipboardContent; // Always update lastClipboardContent to track actual clipboard state
                     }
                 }
                 Thread.sleep(500); // Check clipboard every 500ms
@@ -53,5 +60,14 @@ public class ClipboardMonitor implements Runnable {
                 System.out.println(type + " Clipboard monitor interrupted.");
             }
         }
+    }
+
+    /**
+     * Clears the system clipboard.
+     */
+    public static void clearClipboard() {
+        StringSelection stringSelection = new StringSelection("");
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, null);
     }
 }
