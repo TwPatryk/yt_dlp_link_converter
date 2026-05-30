@@ -2,3 +2,7 @@ Here's a summary of the changes:1.GUI Framework: The application now uses javax.
 
 Here's what's been added:1.runBatButton: A new JButton named runBatButton has been added.2.Layout: The new button is placed alongside the "Start" and "Stop" buttons.3.runBatFile() Method: This new method is responsible for executing the run_youtube_dlp.bat file.•It first checks if the .bat file exists.•It uses ProcessBuilder to execute the command cmd.exe /c start <path_to_bat_file>, which opens the .bat file in a new command prompt window.•It includes error handling and provides feedback to the user through JOptionPane and the linkDisplayArea.4.Button State Management:•The runBatButton is initially disabled.•It becomes enabled after the .bat file is successfully generated (when you click "Stop Capturing & Generate BAT").•It is disabled again when you click "Start Capturing Links".Now, after generating the .bat file, you can click the "Run BAT File" button to execute it directly from the application.
 
+jak stworzyc aplikacje:
+
+mvn clean compile assembly:single
+java -jar target/yt_dlp_link_converter-1.0-SNAPSHOT-jar-with-dependencies.jar
