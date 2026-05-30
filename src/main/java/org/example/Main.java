@@ -6,6 +6,7 @@ import java.awt.datatransfer.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class Main extends JFrame {
 
     private JButton startButton;
     private JButton stopButton;
+    private JButton runBatButton; // New button
     private JTextArea linkDisplayArea;
     private List<String> capturedLinks;
     private AtomicBoolean isCapturing;
@@ -43,10 +45,13 @@ public class Main extends JFrame {
     private void initComponents() {
         startButton = new JButton("Start Capturing Links");
         stopButton = new JButton("Stop Capturing & Generate BAT");
+        runBatButton = new JButton("Run BAT File"); // Initialize the new button
         linkDisplayArea = new JTextArea(10, 40);
         linkDisplayArea.setEditable(false);
         linkDisplayArea.setLineWrap(true);
         linkDisplayArea.setWrapStyleWord(true);
+        stopButton.setEnabled(false); // Initially disabled
+        runBatButton.setEnabled(false); // Initially disabled
     }
 
     private void layoutComponents() {
@@ -55,6 +60,7 @@ public class Main extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(startButton);
         buttonPanel.add(stopButton);
+        buttonPanel.add(runBatButton); // Add the new button to the panel
 
         add(buttonPanel, BorderLayout.NORTH);
         add(new JScrollPane(linkDisplayArea), BorderLayout.CENTER);
@@ -74,6 +80,13 @@ public class Main extends JFrame {
                 stopCapturingAndGenerateBat();
             }
         });
+
+        runBatButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                runBatFile(); // Add action listener for the new button
+            }
+        });
     }
 
     private void startCapturing() {
@@ -81,6 +94,7 @@ public class Main extends JFrame {
             linkDisplayArea.setText("Capturing started...\n");
             startButton.setEnabled(false);
             stopButton.setEnabled(true);
+            runBatButton.setEnabled(false); // Disable run button while capturing
 
             clipboardMonitorThread = new Thread(new ClipboardMonitor());
             clipboardMonitorThread.setDaemon(true); // Allow application to exit even if this thread is running
@@ -100,6 +114,7 @@ public class Main extends JFrame {
             linkDisplayArea.append("\nCapturing stopped. Generating .bat file...\n");
             generateBatFile();
             capturedLinks.clear(); // Clear links after generating the file
+            runBatButton.setEnabled(true); // Enable run button after generating BAT
         }
     }
 
@@ -129,6 +144,26 @@ public class Main extends JFrame {
             linkDisplayArea.append("Error writing .bat file: " + e.getMessage() + "\n");
             JOptionPane.showMessageDialog(this, "Error writing .bat file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             System.err.println("Error writing .bat file: " + e.getMessage());
+        }
+    }
+
+    private void runBatFile() {
+        File batFile = new File(outputFilePath);
+        if (!batFile.exists()) {
+            JOptionPane.showMessageDialog(this, "BAT file not found at: " + outputFilePath + "\nPlease generate it first.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            // Use ProcessBuilder for more control and to avoid issues with spaces in paths
+            ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "start", batFile.getAbsolutePath());
+            pb.start();
+            linkDisplayArea.append("Attempting to run BAT file: " + outputFilePath + "\n");
+            JOptionPane.showMessageDialog(this, "BAT file launched successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            linkDisplayArea.append("Error running BAT file: " + e.getMessage() + "\n");
+            JOptionPane.showMessageDialog(this, "Error running BAT file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            System.err.println("Error running BAT file: " + e.getMessage());
         }
     }
 
