@@ -6,3 +6,8 @@ jak stworzyc aplikacje:
 
 mvn clean compile assembly:single
 java -jar target/yt_dlp_link_converter-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+
+do szybkiego kopiowania linkow
+uzyj wtyczke firefox - copy links on hover-
+najezdzam myszka na element + (Ctrl+c)
